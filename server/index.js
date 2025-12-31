@@ -821,7 +821,6 @@ app.post('/api/customer-service', authenticateToken, (req, res) => {
 
     db.query(query, values, (err, result) => {
         if (err) {
-            console.error('Error creating CS ticket:', err);
             return res.status(500).json({ error: 'Database error' });
         }
         res.status(201).json({ id: result.insertId, message: 'Ticket created successfully' });

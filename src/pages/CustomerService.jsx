@@ -178,10 +178,11 @@ export default function CustomerService() {
 
     // Convert yyyy-mm-dd to dd-mm-yyyy for display
     const convertDateToDisplay = (yyyymmdd) => {
-        if (!yyyymmdd) return '';
+        if (!yyyymmdd || yyyymmdd.length < 10) return '';
         const parts = yyyymmdd.split('-');
         if (parts.length !== 3) return '';
         const [year, month, day] = parts;
+        if (!year || !month || !day) return '';
         return `${day}-${month}-${year}`;
     };
 
@@ -196,13 +197,13 @@ export default function CustomerService() {
                 scope: ticket.scope || '',
                 answer_agent_id: ticket.answer_agent_id,
                 solved_agent_id: ticket.solved_agent_id || '',
-                created_at: toLocalISOString(ticket.created_at),
-                response_at: toLocalISOString(ticket.response_at),
+                created_at: formatDateTimeForInput(ticket.created_at),
+                response_at: formatDateTimeForInput(ticket.response_at),
                 status: ticket.status || 'todo',
                 bug_link: ticket.bug_link || '',
                 working_hours: ticket.working_hours || '',
                 frt: ticket.frt || 0,
-                solved_at: toLocalISOString(ticket.solved_at)
+                solved_at: formatDateTimeForInput(ticket.solved_at)
             });
         } else {
             setCurrentTicket(null);
@@ -232,6 +233,23 @@ export default function CustomerService() {
         if (!start || !end) return 0;
         const diffMs = new Date(end) - new Date(start);
         return Math.floor(diffMs / 60000); // minutes
+    };
+    const handleDateChange = (field, value) => {
+        setFormData(prev => {
+            const newData = { ...prev, [field]: value };
+
+            // Auto-calculate FRT if times change
+            const start = field === 'created_at' ? value : newData.created_at;
+            const end = field === 'response_at' ? value : newData.response_at;
+
+            if (start && end) {
+                newData.frt = calculateFRT(start, end);
+            } else {
+                newData.frt = 0;
+            }
+
+            return newData;
+        });
     };
 
     const handleInputChange = (field, value) => {
@@ -303,7 +321,13 @@ export default function CustomerService() {
 
             // Ensure numbers
             dataToSend.campus_id = parseInt(dataToSend.campus_id) || null;
-            dataToSend.frt = parseInt(dataToSend.frt) || 0;
+
+            // Recalculate FRT just to be safe
+            if (formData.created_at && formData.response_at) {
+                dataToSend.frt = calculateFRT(formData.created_at, formData.response_at);
+            } else {
+                dataToSend.frt = parseInt(dataToSend.frt) || 0;
+            }
 
             const url = currentTicket
                 ? `/api/customer-service/${currentTicket.id}`
@@ -331,7 +355,7 @@ export default function CustomerService() {
                         scope: '',
                         answer_agent_id: defaultAgent ? defaultAgent.id : '',
                         solved_agent_id: '',
-                        created_at: toLocalISOString(new Date()),
+                        created_at: formatDateTimeForInput(new Date()),
                         response_at: '',
                         status: 'todo',
                         bug_link: '',
@@ -565,7 +589,9 @@ export default function CustomerService() {
                         <TableCell>
                             {ticket.response_at ? (
                                 <span className={clsx("font-medium", ticket.frt <= 10 ? "text-emerald-600" : "text-rose-600")}>
-                                    {ticket.frt <= 10 ? `Cepat ${ticket.frt} menit` : `Telat ${ticket.frt - 10} menit`}
+                                    {Number(ticket.frt) < 10 && `Cepat ${Number(ticket.frt)} menit`}
+                                    {Number(ticket.frt) === 10 && `Tepat Waktu`}
+                                    {Number(ticket.frt) > 10 && `Telat ${Number(ticket.frt) - 10} menit`}
                                 </span>
                             ) : '-'}
                         </TableCell>
@@ -650,49 +676,30 @@ export default function CustomerService() {
                             <label className="block text-sm font-medium text-slate-700 mb-1">Agen Solved</label>
                             <select className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-sky-500" value={formData.solved_agent_id} onChange={e => handleInputChange('solved_agent_id', e.target.value)}>
                                 <option value="">Pilih Agen</option>
+                                {agents.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
                             </select>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-1">Waktu Pesan Masuk</label>
-                            <div className="grid grid-cols-2 gap-2">
-                                <input
-                                    type="text"
-                                    maxLength="10"
-                                    placeholder="Contoh: 31122024 atau 31-12-2024"
-                                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-sky-500"
-                                    value={convertDateToDisplay(splitDateTime(formData.created_at).date)}
-                                    onChange={e => handleInputChange('created_at_date', e.target.value)}
-                                />
-                                <input
-                                    type="text"
-                                    maxLength="5"
-                                    placeholder="Contoh: 0730 atau 07:30"
-                                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-sky-500"
-                                    value={splitDateTime(formData.created_at).time}
-                                    onChange={e => handleInputChange('created_at_time', e.target.value)}
-                                />
-                            </div>
+                            <input
+                                type="datetime-local"
+                                step="60"
+                                lang="en-GB"
+                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-sky-500"
+                                value={formData.created_at || ''}
+                                onChange={e => handleDateChange('created_at', e.target.value)}
+                            />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-slate-700 mb-1">Waktu Respon</label>
-                            <div className="grid grid-cols-2 gap-2">
-                                <input
-                                    type="text"
-                                    maxLength="10"
-                                    placeholder="Contoh: 31122024 atau 31-12-2024"
-                                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-sky-500"
-                                    value={convertDateToDisplay(splitDateTime(formData.response_at).date)}
-                                    onChange={e => handleInputChange('response_at_date', e.target.value)}
-                                />
-                                <input
-                                    type="text"
-                                    maxLength="5"
-                                    placeholder="Contoh: 0730 atau 07:30"
-                                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-sky-500"
-                                    value={splitDateTime(formData.response_at).time}
-                                    onChange={e => handleInputChange('response_at_time', e.target.value)}
-                                />
-                            </div>
+                            <input
+                                type="datetime-local"
+                                step="60"
+                                lang="en-GB"
+                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-sky-500"
+                                value={formData.response_at || ''}
+                                onChange={e => handleDateChange('response_at', e.target.value)}
+                            />
                         </div>
                     </div>
 
