@@ -16,7 +16,10 @@ export default function ClientOnboarding() {
 
     const fetchOnboardingData = async () => {
         try {
-            const res = await fetch('/api/onboarding');
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/onboarding', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             if (res.ok) {
                 const json = await res.json();
                 setData(json);
