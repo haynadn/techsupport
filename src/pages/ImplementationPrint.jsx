@@ -32,8 +32,11 @@ export default function ImplementationPrint() {
 
     // Fetch All Data
     const fetchAllData = () => {
+        const token = localStorage.getItem('token');
+        const headers = { 'Authorization': `Bearer ${token}` };
+
         // Fetch Implementation Prints
-        fetch('http://localhost:3000/api/implementation-prints')
+        fetch('/api/implementation-prints', { headers })
             .then(res => res.json())
             .then(data => {
                 const parsedData = data.map(item => ({
@@ -45,13 +48,13 @@ export default function ImplementationPrint() {
             .catch(err => console.error('Error fetching prints:', err));
 
         // Fetch Campuses (for dropdown)
-        fetch('http://localhost:3000/api/campuses')
+        fetch('/api/campuses', { headers })
             .then(res => res.json())
             .then(data => setCampuses(data))
             .catch(err => console.error('Error fetching campuses:', err));
 
         // Fetch Print Result Masters (for Type dropdown)
-        fetch('http://localhost:3000/api/print-results')
+        fetch('/api/print-results', { headers })
             .then(res => res.json())
             .then(data => setPrintMasters(data))
             .catch(err => console.error('Error fetching print masters:', err));
@@ -161,7 +164,11 @@ export default function ImplementationPrint() {
         if (!recordToDelete) return;
 
         try {
-            await fetch(`http://localhost:3000/api/implementation-prints/${recordToDelete.id}`, { method: 'DELETE' });
+            const token = localStorage.getItem('token');
+            await fetch(`/api/implementation-prints/${recordToDelete.id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             fetchAllData();
             showNotification('Data berhasil dihapus');
             setIsDeleteModalOpen(false);
@@ -176,8 +183,8 @@ export default function ImplementationPrint() {
         e.preventDefault();
         try {
             const url = currentRecord
-                ? `http://localhost:3000/api/implementation-prints/${currentRecord.id}`
-                : 'http://localhost:3000/api/implementation-prints';
+                ? `/api/implementation-prints/${currentRecord.id}`
+                : '/api/implementation-prints';
 
             const method = currentRecord ? 'PUT' : 'POST';
 
@@ -187,9 +194,13 @@ export default function ImplementationPrint() {
                 campus_id: parseInt(formData.campus_id)
             };
 
+            const token = localStorage.getItem('token');
             const response = await fetch(url, {
                 method: method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify(payload)
             });
 

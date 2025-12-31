@@ -59,8 +59,11 @@ export default function Training() {
 
     // Fetch all required data
     const fetchAllData = () => {
+        const token = localStorage.getItem('token');
+        const headers = { 'Authorization': `Bearer ${token}` };
+
         // Fetch Tickets
-        fetch('http://localhost:3000/api/training-tickets')
+        fetch('/api/training-tickets', { headers })
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) {
@@ -76,9 +79,9 @@ export default function Training() {
             });
 
         // Fetch Master Data for Dropdowns
-        fetch('http://localhost:3000/api/campuses').then(res => res.json()).then(setCampuses);
-        fetch('http://localhost:3000/api/agents').then(res => res.json()).then(setTrainers);
-        fetch('http://localhost:3000/api/materials').then(res => res.json()).then(setMaterials);
+        fetch('/api/campuses', { headers }).then(res => res.json()).then(setCampuses);
+        fetch('/api/agents', { headers }).then(res => res.json()).then(setTrainers);
+        fetch('/api/materials', { headers }).then(res => res.json()).then(setMaterials);
     };
 
     useEffect(() => {
@@ -190,9 +193,13 @@ export default function Training() {
             }).filter(d => d.campus_id && d.agent_id && d.material_id);
 
             if (formattedData.length > 0) {
-                fetch('http://localhost:3000/api/training-tickets/bulk', {
+                const token = localStorage.getItem('token');
+                fetch('/api/training-tickets/bulk', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
                     body: JSON.stringify(formattedData)
                 })
                     .then(res => res.json())
@@ -253,7 +260,11 @@ export default function Training() {
         if (!ticketToDelete) return;
 
         try {
-            await fetch(`http://localhost:3000/api/training-tickets/${ticketToDelete.id}`, { method: 'DELETE' });
+            const token = localStorage.getItem('token');
+            await fetch(`/api/training-tickets/${ticketToDelete.id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             fetchAllData();
             showNotification('Ticket berhasil dihapus');
             setIsDeleteModalOpen(false);
@@ -268,14 +279,18 @@ export default function Training() {
         e.preventDefault();
         try {
             const url = currentTicket
-                ? `http://localhost:3000/api/training-tickets/${currentTicket.id}`
-                : 'http://localhost:3000/api/training-tickets';
+                ? `/api/training-tickets/${currentTicket.id}`
+                : '/api/training-tickets';
 
             const method = currentTicket ? 'PUT' : 'POST';
 
+            const token = localStorage.getItem('token');
             await fetch(url, {
                 method: method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify(formData)
             });
 

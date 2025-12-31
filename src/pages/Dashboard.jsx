@@ -12,7 +12,10 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetch('/api/dashboard')
+        const token = localStorage.getItem('token');
+        fetch('/api/dashboard', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
             .then(res => res.json())
             .then(json => {
                 console.log('Dashboard API Response:', json);

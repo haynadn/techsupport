@@ -79,11 +79,14 @@ export default function Migration() {
 
     const fetchAllData = async () => {
         try {
+            const token = localStorage.getItem('token');
+            const headers = { 'Authorization': `Bearer ${token}` };
+
             const results = await Promise.allSettled([
-                fetch('/api/migrations'),
-                fetch('/api/campuses'),
-                fetch('/api/agents'),
-                fetch('/api/slas')
+                fetch('/api/migrations', { headers }),
+                fetch('/api/campuses', { headers }),
+                fetch('/api/agents', { headers }),
+                fetch('/api/slas', { headers })
             ]);
 
             const [mgrRes, campRes, agentRes, slaRes] = results;
@@ -262,7 +265,11 @@ export default function Migration() {
     const handleDelete = async () => {
         try {
             // Delete ALL for campus
-            await fetch(`/api/migrations/campus/${recordToDelete.campus_id}`, { method: 'DELETE' });
+            const token = localStorage.getItem('token');
+            await fetch(`/api/migrations/campus/${recordToDelete.campus_id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             fetchAllData();
             showNotification('Satu paket migrasi kampus berhasil dihapus');
             setIsDeleteModalOpen(false);
@@ -277,8 +284,12 @@ export default function Migration() {
         try {
             // 1. Process Deletions
             if (deletedItemIds.length > 0) {
+                const token = localStorage.getItem('token');
                 await Promise.all(deletedItemIds.map(id =>
-                    fetch(`/api/migrations/${id}`, { method: 'DELETE' })
+                    fetch(`/api/migrations/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    })
                 ));
             }
 
@@ -293,7 +304,10 @@ export default function Migration() {
                     // Update existing
                     return fetch(`/api/migrations/${item.id}`, {
                         method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                        },
                         body: JSON.stringify(payload)
                     });
                 } else {
@@ -309,7 +323,10 @@ export default function Migration() {
             if (newItems.length > 0) {
                 await fetch('/api/migrations/batch', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
                     body: JSON.stringify({
                         campus_id: formData.campus_id,
                         items: newItems

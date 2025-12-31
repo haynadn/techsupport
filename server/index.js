@@ -9,7 +9,7 @@ const { body, validationResult } = require('express-validator');
 require('dotenv').config();
 
 const app = express();
-const port = 3000;
+const port = 3001;
 const SECRET_KEY = process.env.JWT_SECRET || 'your_super_secret_key_change_this';
 
 // Security Headers
@@ -36,7 +36,7 @@ const loginLimiter = rateLimit({
 
 const apiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // 100 requests per 15 minutes
+    max: 1000, // 1000 requests per 15 minutes
     message: { message: 'Too many requests. Please try again later.' },
     standardHeaders: true,
     legacyHeaders: false,
@@ -47,6 +47,7 @@ app.use('/api/', apiLimiter);
 
 // JWT Authentication Middleware
 const authenticateToken = (req, res, next) => {
+    console.log(`Auth Middleware: ${req.method} ${req.url}`);
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
 
@@ -767,14 +768,10 @@ app.delete('/api/migrations/:id', authenticateToken, (req, res) => {
 
 // === CUSTOMER SERVICE ENDPOINTS ===
 
-// Get All Sources
-app.get('/api/sources', authenticateToken, (req, res) => {
-    db.query('SELECT * FROM sources ORDER BY name', (err, results) => {
-        if (err) return res.status(500).json(err);
-        res.json(results);
-    });
-});
+// Duplicate sources route removed
 
+
+// Get Tickets
 // Get Tickets
 app.get('/api/customer-service', authenticateToken, (req, res) => {
     const query = `
@@ -782,7 +779,8 @@ app.get('/api/customer-service', authenticateToken, (req, res) => {
                c.name as campus_name,
                s.name as source_name,
                ag_ans.name as answer_agent_name,
-               ag_sol.name as solved_agent_name
+               ag_sol.name as solved_agent_name,
+               IF(t.solved_at = '0000-00-00 00:00:00', NULL, t.solved_at) as solved_at
         FROM customer_service_tickets t
         LEFT JOIN campuses c ON t.campus_id = c.id
         LEFT JOIN sources s ON t.source_id = s.id
@@ -793,7 +791,7 @@ app.get('/api/customer-service', authenticateToken, (req, res) => {
     db.query(query, (err, results) => {
         if (err) {
             console.error('Error fetching CS tickets:', err);
-            return res.status(500).json({ error: 'Database error' });
+            return res.status(500).json({ error: 'Database error: ' + err.message });
         }
         res.json(results);
     });
@@ -869,22 +867,29 @@ app.delete('/api/customer-service/:id', authenticateToken, (req, res) => {
 
 
 app.get('/api/onboarding', authenticateToken, (req, res) => {
+    console.log('HIT /api/onboarding');
     const query = `
         SELECT 
             c.id, c.name,
-            -- Deployment Date: Date when 'Deployment' task was completed
-            (SELECT MIN(completed_at) FROM migrations m WHERE m.campus_id = c.id AND m.name LIKE '%Deployment%' AND m.status = 'completed') as deployment_date,
+            -- Deployment Date: Date when 'Deployment' task was completed (check via SLA type)
+            (SELECT MIN(m.completed_at) 
+             FROM migrations m 
+             JOIN sla s ON m.sla_id = s.id
+             WHERE m.campus_id = c.id AND s.type LIKE '%Deployment%' AND m.status = 'completed') as deployment_date,
             
             -- Impl Progress
             (SELECT COUNT(*) FROM migrations m WHERE m.campus_id = c.id AND m.status = 'completed') as impl_completed,
             (SELECT COUNT(*) FROM migrations m WHERE m.campus_id = c.id) as impl_total,
             
             -- Train Progress
-            (SELECT COUNT(*) FROM training_tickets t WHERE t.campus_id = c.id AND t.status = 'completed') as train_completed,
+            (SELECT COUNT(*) FROM training_tickets t WHERE t.campus_id = c.id AND t.status = 'done') as train_completed,
             (SELECT COUNT(*) FROM training_tickets t WHERE t.campus_id = c.id) as train_total,
             
-            -- Train Finish Date: Latest 'Pelatihan Operator' completion
-            (SELECT MAX(solved_at) FROM training_tickets t WHERE t.campus_id = c.id AND t.status = 'completed' AND t.title LIKE '%Operator%') as train_finish_date
+            -- Train Finish Date: Latest 'Operator' completion (check via Material Name)
+            (SELECT MAX(t.date_closed) 
+             FROM training_tickets t 
+             JOIN materials m ON t.material_id = m.id
+             WHERE t.campus_id = c.id AND t.status = 'done' AND m.name LIKE '%Operator%') as train_finish_date
         FROM campuses c
         WHERE c.status = 'active'
     `;
@@ -1019,6 +1024,6 @@ app.get('/api/dashboard', async (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
+    console.log(`Server running on http://localhost:${port} [UPDATED]`);
 });
 

@@ -67,12 +67,15 @@ export default function CustomerService() {
 
     const fetchAllData = async () => {
         try {
+            const token = localStorage.getItem('token');
+            const headers = { 'Authorization': `Bearer ${token}` };
+
             const results = await Promise.allSettled([
-                fetch('/api/customer-service'),
-                fetch('/api/campuses'),
-                fetch('/api/sources'),
-                fetch('/api/agents'),
-                fetch('/api/scopes')
+                fetch('/api/customer-service', { headers }),
+                fetch('/api/campuses', { headers }),
+                fetch('/api/sources', { headers }),
+                fetch('/api/agents', { headers }),
+                fetch('/api/scopes', { headers })
             ]);
 
             const [ticketRes, campusRes, sourceRes, agentRes, scopeRes] = results;
@@ -82,7 +85,7 @@ export default function CustomerService() {
                 setTickets(data);
             } else {
                 console.error("Fetch tickets failed", ticketRes);
-                // showNotification('Gagal memuat tiket', 'error');
+                showNotification('Gagal memuat tiket', 'error');
             }
 
             if (campusRes.status === 'fulfilled' && campusRes.value.ok) setCampuses(await campusRes.value.json());
@@ -310,9 +313,13 @@ export default function CustomerService() {
                 : '/api/customer-service';
             const method = currentTicket ? 'PUT' : 'POST';
 
+            const token = localStorage.getItem('token');
             const res = await fetch(url, {
                 method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify(dataToSend)
             });
 
@@ -352,7 +359,11 @@ export default function CustomerService() {
 
     const handleDelete = async () => {
         try {
-            await fetch(`/api/customer-service/${ticketToDelete.id}`, { method: 'DELETE' });
+            const token = localStorage.getItem('token');
+            await fetch(`/api/customer-service/${ticketToDelete.id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             showNotification('Tiket dihapus');
             setIsDeleteModalOpen(false);
             fetchAllData();
