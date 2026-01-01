@@ -12,7 +12,7 @@ const fs = require('fs');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3000;
 const SECRET_KEY = process.env.JWT_SECRET || 'your_super_secret_key_change_this';
 
 // Security Headers - Removed helmet as it might be forcing SSL in some browser caches
@@ -1047,8 +1047,7 @@ app.get('/api/dashboard', async (req, res) => {
 });
 
 // React Router - Handle all other requests by serving index.html
-// Using regex to avoid path-to-regexp version compatibility issues in Express 5
-app.get(/^(?!\/api).+/, (req, res) => {
+app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
