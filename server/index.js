@@ -1047,18 +1047,12 @@ app.get('/api/dashboard', async (req, res) => {
 });
 
 // React Router - Handle all other requests by serving index.html
-// Express 5 requires named parameters or (.*) for wildcards
-app.get('(.*)', (req, res) => {
+// Using literal regex to bypass path-to-regexp v8 issues in Express 5
+app.get(/^(?!\/api).+/, (req, res) => {
     res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
 app.listen(port, () => {
-    console.log(`Server running on port ${port} [UPDATED]`);
-    console.log('Environment Debug:');
-    console.log('- PORT from env:', process.env.PORT);
-    console.log('- NODE_ENV:', process.env.NODE_ENV);
-    console.log('- Database Host:', process.env.DB_HOST);
-    console.log('- Current Directory:', process.cwd());
-    console.log('- __dirname:', __dirname);
+    console.log(`Server running on port ${port} [STABLE_PROD]`);
 });
 
