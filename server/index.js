@@ -15,8 +15,11 @@ const app = express();
 const port = process.env.PORT || 3001;
 const SECRET_KEY = process.env.JWT_SECRET || 'your_super_secret_key_change_this';
 
-// Security Headers
-app.use(helmet());
+// Security Headers - Disabled HSTS and CSP for compatibility with plain HTTP/IP deployment
+app.use(helmet({
+    contentSecurityPolicy: false,
+    hsts: false,
+}));
 
 // CORS Configuration - Restrict to specific origin
 const corsOptions = {
