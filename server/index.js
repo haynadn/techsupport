@@ -804,7 +804,7 @@ app.get('/api/customer-service', authenticateToken, (req, res) => {
                s.name as source_name,
                ag_ans.name as answer_agent_name,
                ag_sol.name as solved_agent_name,
-               IF(t.solved_at = '0000-00-00 00:00:00', NULL, t.solved_at) as solved_at
+               IF(t.solved_at > '1000-01-01', t.solved_at, NULL) as solved_at
         FROM customer_service_tickets t
         LEFT JOIN campuses c ON t.campus_id = c.id
         LEFT JOIN sources s ON t.source_id = s.id
