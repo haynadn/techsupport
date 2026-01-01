@@ -8,7 +8,7 @@ const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const { body, validationResult } = require('express-validator');
-require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -1029,8 +1029,8 @@ app.get('/api/dashboard', async (req, res) => {
 });
 
 // React Router - Handle all other requests by serving index.html
-// Express 5 / path-to-regexp 6+ requires named parameters for wildcards
-app.get('/:path*', (req, res) => {
+// Using regex to avoid path-to-regexp version compatibility issues in Express 5
+app.get(/^(?!\/api).+/, (req, res) => {
     res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
