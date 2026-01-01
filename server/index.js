@@ -15,11 +15,19 @@ const app = express();
 const port = process.env.PORT || 3001;
 const SECRET_KEY = process.env.JWT_SECRET || 'your_super_secret_key_change_this';
 
-// Security Headers - Disabled HSTS and CSP for compatibility with plain HTTP/IP deployment
-app.use(helmet({
-    contentSecurityPolicy: false,
-    hsts: false,
-}));
+// Security Headers - Removed helmet as it might be forcing SSL in some browser caches
+// app.use(helmet({
+//     contentSecurityPolicy: false,
+//     hsts: false,
+// }));
+
+// Debug Middleware for asset requests
+app.use((req, res, next) => {
+    if (req.url.includes('/assets/')) {
+        console.log(`[ASSET REQUEST] Protocol: ${req.protocol}, URL: ${req.url}`);
+    }
+    next();
+});
 
 // CORS Configuration - Restrict to specific origin
 const corsOptions = {
