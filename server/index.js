@@ -8,14 +8,25 @@ const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
 const { body, validationResult } = require('express-validator');
+const fs = require('fs');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
+
+const envPath = path.join(__dirname, '.env');
+console.log('--- Environment Initialization ---');
+console.log('Looking for .env at:', envPath);
+if (fs.existsSync(envPath)) {
+    console.log('.env file found.');
+    const stats = fs.statSync(envPath);
+    console.log('.env size:', stats.size, 'bytes');
+} else {
+    console.error('.env file NOT FOUND at this path!');
+}
 
 const app = express();
 const port = process.env.PORT || 3001;
-const SECRET_KEY = process.env.JWT_SECRET || 'your_super_secret_key_change_this';
-
-// Security Headers
-app.use(helmet());
+console.log('PORT loaded from env:', process.env.PORT);
+console.log('DB_USER loaded from env:', process.env.DB_USER);
+console.log('DB_PASSWORD loaded from env:', process.env.DB_PASSWORD ? '****' : 'UNDEFINED');
 
 // CORS Configuration - Restrict to specific origin
 const corsOptions = {
