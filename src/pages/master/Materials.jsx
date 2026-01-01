@@ -26,7 +26,7 @@ export default function Materials() {
     });
 
     const fetchMaterials = () => {
-        fetch('http://localhost:3000/api/materials')
+        fetch('/api/materials')
             .then(res => res.json())
             .then(data => setMaterials(data))
             .catch(err => console.error('Error fetching materials:', err));
@@ -75,7 +75,7 @@ export default function Materials() {
         if (!materialToDelete) return;
 
         try {
-            await fetch(`http://localhost:3000/api/materials/${materialToDelete.id}`, { method: 'DELETE' });
+            await fetch(`/api/materials/${materialToDelete.id}`, { method: 'DELETE' });
             fetchMaterials();
             showNotification('Data materi training berhasil dihapus');
             setIsDeleteModalOpen(false);
@@ -90,8 +90,8 @@ export default function Materials() {
         e.preventDefault();
         try {
             const url = currentMaterial
-                ? `http://localhost:3000/api/materials/${currentMaterial.id}`
-                : 'http://localhost:3000/api/materials';
+                ? `/api/materials/${currentMaterial.id}`
+                : '/api/materials';
 
             const method = currentMaterial ? 'PUT' : 'POST';
 

@@ -49,7 +49,7 @@ export default function Holidays() {
     const years = Array.from({ length: 5 }, (_, i) => (currentYear - 2 + i).toString());
 
     const fetchHolidays = () => {
-        fetch('http://localhost:3000/api/holidays')
+        fetch('/api/holidays')
             .then(res => res.json())
             .then(data => setHolidays(data))
             .catch(err => console.error('Error fetching holidays:', err));
@@ -133,7 +133,7 @@ export default function Holidays() {
             }));
 
             if (formattedData.length > 0) {
-                fetch('http://localhost:3000/api/holidays/bulk', {
+                fetch('/api/holidays/bulk', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formattedData)
@@ -175,7 +175,7 @@ export default function Holidays() {
         if (!holidayToDelete) return;
 
         try {
-            await fetch(`http://localhost:3000/api/holidays/${holidayToDelete.id}`, { method: 'DELETE' });
+            await fetch(`/api/holidays/${holidayToDelete.id}`, { method: 'DELETE' });
             fetchHolidays();
             showNotification('Data hari libur berhasil dihapus');
             setIsDeleteModalOpen(false);
@@ -190,8 +190,8 @@ export default function Holidays() {
         e.preventDefault();
         try {
             const url = currentHoliday
-                ? `http://localhost:3000/api/holidays/${currentHoliday.id}`
-                : 'http://localhost:3000/api/holidays';
+                ? `/api/holidays/${currentHoliday.id}`
+                : '/api/holidays';
 
             const method = currentHoliday ? 'PUT' : 'POST';
 

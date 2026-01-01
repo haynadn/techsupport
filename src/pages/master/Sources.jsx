@@ -26,7 +26,7 @@ export default function Sources() {
     });
 
     const fetchSources = () => {
-        fetch('http://localhost:3000/api/sources')
+        fetch('/api/sources')
             .then(res => res.json())
             .then(data => setSources(data))
             .catch(err => console.error('Error fetching sources:', err));
@@ -75,7 +75,7 @@ export default function Sources() {
         if (!sourceToDelete) return;
 
         try {
-            await fetch(`http://localhost:3000/api/sources/${sourceToDelete.id}`, { method: 'DELETE' });
+            await fetch(`/api/sources/${sourceToDelete.id}`, { method: 'DELETE' });
             fetchSources();
             showNotification('Data sumber berhasil dihapus');
             setIsDeleteModalOpen(false);
@@ -90,8 +90,8 @@ export default function Sources() {
         e.preventDefault();
         try {
             const url = currentSource
-                ? `http://localhost:3000/api/sources/${currentSource.id}`
-                : 'http://localhost:3000/api/sources';
+                ? `/api/sources/${currentSource.id}`
+                : '/api/sources';
 
             const method = currentSource ? 'PUT' : 'POST';
 

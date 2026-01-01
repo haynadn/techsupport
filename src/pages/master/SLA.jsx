@@ -27,7 +27,7 @@ export default function SLA() {
     const categoryOptions = ['Migrasi', 'Customer Service'];
 
     const fetchSLAs = () => {
-        fetch('http://localhost:3000/api/slas')
+        fetch('/api/slas')
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) {
@@ -95,7 +95,7 @@ export default function SLA() {
         if (!slaToDelete) return;
 
         try {
-            await fetch(`http://localhost:3000/api/slas/${slaToDelete.id}`, { method: 'DELETE' });
+            await fetch(`/api/slas/${slaToDelete.id}`, { method: 'DELETE' });
             fetchSLAs();
             showNotification('Data SLA berhasil dihapus');
             setIsDeleteModalOpen(false);
@@ -110,8 +110,8 @@ export default function SLA() {
         e.preventDefault();
         try {
             const url = currentSLA
-                ? `http://localhost:3000/api/slas/${currentSLA.id}`
-                : 'http://localhost:3000/api/slas';
+                ? `/api/slas/${currentSLA.id}`
+                : '/api/slas';
 
             const method = currentSLA ? 'PUT' : 'POST';
 

@@ -31,7 +31,7 @@ export default function PrintResults() {
     const AVAILABLE_PORTALS = ["Operator", "Mahasiswa"];
 
     const fetchPrintResults = () => {
-        fetch('http://localhost:3000/api/print-results')
+        fetch('/api/print-results')
             .then(res => res.json())
             .then(data => {
                 setPrintResults(data);
@@ -90,7 +90,7 @@ export default function PrintResults() {
         if (!resultToDelete) return;
 
         try {
-            await fetch(`http://localhost:3000/api/print-results/${resultToDelete.id}`, { method: 'DELETE' });
+            await fetch(`/api/print-results/${resultToDelete.id}`, { method: 'DELETE' });
             fetchPrintResults();
             showNotification('Data hasil cetak berhasil dihapus');
             setIsDeleteModalOpen(false);
@@ -105,8 +105,8 @@ export default function PrintResults() {
         e.preventDefault();
         try {
             const url = currentResult
-                ? `http://localhost:3000/api/print-results/${currentResult.id}`
-                : 'http://localhost:3000/api/print-results';
+                ? `/api/print-results/${currentResult.id}`
+                : '/api/print-results';
 
             const method = currentResult ? 'PUT' : 'POST';
 

@@ -26,7 +26,7 @@ export default function Scopes() {
     });
 
     const fetchScopes = () => {
-        fetch('http://localhost:3000/api/scopes')
+        fetch('/api/scopes')
             .then(res => res.json())
             .then(data => setScopes(data))
             .catch(err => console.error('Error fetching scopes:', err));
@@ -75,7 +75,7 @@ export default function Scopes() {
         if (!scopeToDelete) return;
 
         try {
-            await fetch(`http://localhost:3000/api/scopes/${scopeToDelete.id}`, { method: 'DELETE' });
+            await fetch(`/api/scopes/${scopeToDelete.id}`, { method: 'DELETE' });
             fetchScopes();
             showNotification('Data ruang lingkup berhasil dihapus');
             setIsDeleteModalOpen(false);
@@ -90,8 +90,8 @@ export default function Scopes() {
         e.preventDefault();
         try {
             const url = currentScope
-                ? `http://localhost:3000/api/scopes/${currentScope.id}`
-                : 'http://localhost:3000/api/scopes';
+                ? `/api/scopes/${currentScope.id}`
+                : '/api/scopes';
 
             const method = currentScope ? 'PUT' : 'POST';
 

@@ -34,7 +34,7 @@ export default function Agents() {
     });
 
     const fetchAgents = () => {
-        fetch('http://localhost:3000/api/agents')
+        fetch('/api/agents')
             .then(res => res.json())
             .then(data => setAgents(data))
             .catch(err => console.error('Error fetching agents:', err));
@@ -102,7 +102,7 @@ export default function Agents() {
         if (!agentToDelete) return;
 
         try {
-            await fetch(`http://localhost:3000/api/agents/${agentToDelete.id}`, { method: 'DELETE' });
+            await fetch(`/api/agents/${agentToDelete.id}`, { method: 'DELETE' });
             fetchAgents();
             showNotification('Data agen berhasil dihapus');
             setIsDeleteModalOpen(false);
@@ -117,8 +117,8 @@ export default function Agents() {
         e.preventDefault();
         try {
             const url = currentAgent
-                ? `http://localhost:3000/api/agents/${currentAgent.id}`
-                : 'http://localhost:3000/api/agents';
+                ? `/api/agents/${currentAgent.id}`
+                : '/api/agents';
 
             const method = currentAgent ? 'PUT' : 'POST';
 

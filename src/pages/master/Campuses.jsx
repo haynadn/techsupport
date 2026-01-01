@@ -44,7 +44,7 @@ export default function Campuses() {
     ];
 
     const fetchCampuses = () => {
-        fetch('http://localhost:3000/api/campuses')
+        fetch('/api/campuses')
             .then(res => res.json())
             .then(data => {
                 // Parse applications JSON string coming from DB
@@ -121,7 +121,7 @@ export default function Campuses() {
             }));
 
             if (formattedData.length > 0) {
-                fetch('http://localhost:3000/api/campuses/bulk', {
+                fetch('/api/campuses/bulk', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formattedData)
@@ -210,7 +210,7 @@ export default function Campuses() {
         if (!campusToDelete) return;
 
         try {
-            await fetch(`http://localhost:3000/api/campuses/${campusToDelete.id}`, { method: 'DELETE' });
+            await fetch(`/api/campuses/${campusToDelete.id}`, { method: 'DELETE' });
             fetchCampuses();
             showNotification('Data kampus berhasil dihapus');
             setIsDeleteModalOpen(false);
@@ -225,8 +225,8 @@ export default function Campuses() {
         e.preventDefault();
         try {
             const url = currentCampus
-                ? `http://localhost:3000/api/campuses/${currentCampus.id}`
-                : 'http://localhost:3000/api/campuses';
+                ? `/api/campuses/${currentCampus.id}`
+                : '/api/campuses';
 
             const method = currentCampus ? 'PUT' : 'POST';
 
