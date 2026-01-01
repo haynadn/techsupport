@@ -972,7 +972,6 @@ app.get('/api/dashboard', async (req, res) => {
         const dbPromise = db.promise();
 
         // 1. Ticket Stats
-        console.log('[DASHBOARD] Fetching ticket stats...');
         const [ticketStats] = await dbPromise.query(`
             SELECT 
                 COUNT(*) as total,
@@ -983,25 +982,25 @@ app.get('/api/dashboard', async (req, res) => {
         `);
 
         // 2. Weekly Trend (Last 7 Days)
-        console.log('[DASHBOARD] Fetching weekly trend...');
         const [trendRes] = await dbPromise.query(`
-            SELECT DATE_FORMAT(created_at, '%a') as name, COUNT(*) as tiket, SUM(CASE WHEN status='completed' THEN 1 ELSE 0 END) as selesai
+            SELECT 
+                DATE_FORMAT(created_at, '%a') as name, 
+                COUNT(*) as tiket, 
+                SUM(CASE WHEN status='completed' THEN 1 ELSE 0 END) as selesai,
+                DATE(created_at) as date_grp
             FROM customer_service_tickets
             WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
-            GROUP BY DATE(created_at)
-            ORDER BY created_at ASC
+            GROUP BY date_grp, name
+            ORDER BY date_grp ASC
         `);
 
         // 3. Status Composition (CS)
-        console.log('[DASHBOARD] Fetching CS status composition...');
         const [csStatus] = await dbPromise.query(`SELECT status as name, COUNT(*) as value FROM customer_service_tickets GROUP BY status`);
 
         // 4. Migration Status
-        console.log('[DASHBOARD] Fetching migration status...');
         const [migStatus] = await dbPromise.query(`SELECT status as name, COUNT(*) as value FROM migrations GROUP BY status`);
 
         // 5. FRT Monthly Trend (Last 6 months)
-        console.log('[DASHBOARD] Fetching FRT monthly trend...');
         const [frtMonthly] = await dbPromise.query(`
             SELECT 
                 DATE_FORMAT(created_at, '%b %Y') as month,
@@ -1015,8 +1014,6 @@ app.get('/api/dashboard', async (req, res) => {
             GROUP BY month_key, month
             ORDER BY month_key ASC
         `);
-
-        console.log('FRT Monthly Query Result:', frtMonthly);
 
         // Calculate FRT percentage change (current vs previous month)
         let frtChange = null;
@@ -1032,11 +1029,9 @@ app.get('/api/dashboard', async (req, res) => {
             };
         }
 
-        console.log('FRT Change:', frtChange);
-
         res.json({
             stats: ticketStats[0],
-            trend: trendRes,
+            trend: trendRes.map(t => ({ name: t.name, tiket: t.tiket, selesai: t.selesai })), // Clean up extra fields
             composition: {
                 cs: csStatus,
                 migration: migStatus
