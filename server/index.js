@@ -1029,12 +1029,18 @@ app.get('/api/dashboard', async (req, res) => {
 });
 
 // React Router - Handle all other requests by serving index.html
-app.get('/*', (req, res) => {
+// Express 5 / path-to-regexp 6+ requires named parameters for wildcards
+app.get('/:path*', (req, res) => {
     res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
 app.listen(port, () => {
     console.log(`Server running on port ${port} [UPDATED]`);
-    console.log('Loaded PORT from env:', process.env.PORT);
+    console.log('Environment Debug:');
+    console.log('- PORT from env:', process.env.PORT);
+    console.log('- NODE_ENV:', process.env.NODE_ENV);
+    console.log('- Database Host:', process.env.DB_HOST);
+    console.log('- Current Directory:', process.cwd());
+    console.log('- __dirname:', __dirname);
 });
 
