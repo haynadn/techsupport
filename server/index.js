@@ -28,6 +28,10 @@ console.log('PORT loaded from env:', process.env.PORT);
 console.log('DB_USER loaded from env:', process.env.DB_USER);
 console.log('DB_PASSWORD loaded from env:', process.env.DB_PASSWORD ? '****' : 'UNDEFINED');
 
+// List all DB keys found for diagnostics
+const dbKeys = Object.keys(process.env).filter(k => k.startsWith('DB_'));
+console.log('Detected DB env keys:', dbKeys.join(', '));
+
 // CORS Configuration - Restrict to specific origin
 const corsOptions = {
     origin: process.env.FRONTEND_URL || 'http://localhost:5173',
@@ -116,6 +120,7 @@ app.post('/api/login',
         body('password').notEmpty().withMessage('Password is required')
     ],
     (req, res) => {
+        console.log(`[LOGIN] Attempt starting for user: ${req.body.username}`);
         // Validate input
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -125,7 +130,12 @@ app.post('/api/login',
         const { username, password } = req.body;
 
         db.query('SELECT * FROM agents WHERE username = ?', [username], async (err, results) => {
-            if (err) return res.status(500).json(err);
+            if (err) {
+                console.error('[LOGIN] Database query error:', err);
+                return res.status(500).json({ error: 'Database error', details: err.message });
+            }
+
+            console.log(`[LOGIN] Database check completed. User found: ${results.length > 0}`);
 
             if (results.length === 0) {
                 return res.status(401).json({ message: 'Invalid username or password' });
