@@ -972,6 +972,7 @@ app.get('/api/dashboard', async (req, res) => {
         const dbPromise = db.promise();
 
         // 1. Ticket Stats
+        console.log('[DASHBOARD] Fetching ticket stats...');
         const [ticketStats] = await dbPromise.query(`
             SELECT 
                 COUNT(*) as total,
@@ -982,6 +983,7 @@ app.get('/api/dashboard', async (req, res) => {
         `);
 
         // 2. Weekly Trend (Last 7 Days)
+        console.log('[DASHBOARD] Fetching weekly trend...');
         const [trendRes] = await dbPromise.query(`
             SELECT DATE_FORMAT(created_at, '%a') as name, COUNT(*) as tiket, SUM(CASE WHEN status='completed' THEN 1 ELSE 0 END) as selesai
             FROM customer_service_tickets
@@ -991,12 +993,15 @@ app.get('/api/dashboard', async (req, res) => {
         `);
 
         // 3. Status Composition (CS)
+        console.log('[DASHBOARD] Fetching CS status composition...');
         const [csStatus] = await dbPromise.query(`SELECT status as name, COUNT(*) as value FROM customer_service_tickets GROUP BY status`);
 
         // 4. Migration Status
+        console.log('[DASHBOARD] Fetching migration status...');
         const [migStatus] = await dbPromise.query(`SELECT status as name, COUNT(*) as value FROM migrations GROUP BY status`);
 
         // 5. FRT Monthly Trend (Last 6 months)
+        console.log('[DASHBOARD] Fetching FRT monthly trend...');
         const [frtMonthly] = await dbPromise.query(`
             SELECT 
                 DATE_FORMAT(created_at, '%b %Y') as month,
