@@ -44,7 +44,10 @@ export default function Campuses() {
     ];
 
     const fetchCampuses = () => {
-        fetch('/api/campuses')
+        const token = localStorage.getItem('token');
+        fetch('/api/campuses', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
             .then(res => res.json())
             .then(data => {
                 // Parse applications JSON string coming from DB
@@ -121,9 +124,13 @@ export default function Campuses() {
             }));
 
             if (formattedData.length > 0) {
+                const token = localStorage.getItem('token');
                 fetch('/api/campuses/bulk', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
                     body: JSON.stringify(formattedData)
                 })
                     .then(res => res.json())
@@ -210,7 +217,11 @@ export default function Campuses() {
         if (!campusToDelete) return;
 
         try {
-            await fetch(`/api/campuses/${campusToDelete.id}`, { method: 'DELETE' });
+            const token = localStorage.getItem('token');
+            await fetch(`/api/campuses/${campusToDelete.id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             fetchCampuses();
             showNotification('Data kampus berhasil dihapus');
             setIsDeleteModalOpen(false);
@@ -230,9 +241,13 @@ export default function Campuses() {
 
             const method = currentCampus ? 'PUT' : 'POST';
 
+            const token = localStorage.getItem('token');
             await fetch(url, {
                 method: method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify(formData)
             });
 

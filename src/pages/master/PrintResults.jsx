@@ -31,7 +31,10 @@ export default function PrintResults() {
     const AVAILABLE_PORTALS = ["Operator", "Mahasiswa"];
 
     const fetchPrintResults = () => {
-        fetch('/api/print-results')
+        const token = localStorage.getItem('token');
+        fetch('/api/print-results', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
             .then(res => res.json())
             .then(data => {
                 setPrintResults(data);
@@ -90,7 +93,11 @@ export default function PrintResults() {
         if (!resultToDelete) return;
 
         try {
-            await fetch(`/api/print-results/${resultToDelete.id}`, { method: 'DELETE' });
+            const token = localStorage.getItem('token');
+            await fetch(`/api/print-results/${resultToDelete.id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             fetchPrintResults();
             showNotification('Data hasil cetak berhasil dihapus');
             setIsDeleteModalOpen(false);
@@ -110,9 +117,13 @@ export default function PrintResults() {
 
             const method = currentResult ? 'PUT' : 'POST';
 
+            const token = localStorage.getItem('token');
             await fetch(url, {
                 method: method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify(formData)
             });
 

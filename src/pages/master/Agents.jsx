@@ -34,7 +34,10 @@ export default function Agents() {
     });
 
     const fetchAgents = () => {
-        fetch('/api/agents')
+        const token = localStorage.getItem('token');
+        fetch('/api/agents', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
             .then(res => res.json())
             .then(data => setAgents(data))
             .catch(err => console.error('Error fetching agents:', err));
@@ -102,7 +105,11 @@ export default function Agents() {
         if (!agentToDelete) return;
 
         try {
-            await fetch(`/api/agents/${agentToDelete.id}`, { method: 'DELETE' });
+            const token = localStorage.getItem('token');
+            await fetch(`/api/agents/${agentToDelete.id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             fetchAgents();
             showNotification('Data agen berhasil dihapus');
             setIsDeleteModalOpen(false);
@@ -122,9 +129,13 @@ export default function Agents() {
 
             const method = currentAgent ? 'PUT' : 'POST';
 
+            const token = localStorage.getItem('token');
             await fetch(url, {
                 method: method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify(formData)
             });
 

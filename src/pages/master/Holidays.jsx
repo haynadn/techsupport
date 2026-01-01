@@ -49,7 +49,10 @@ export default function Holidays() {
     const years = Array.from({ length: 5 }, (_, i) => (currentYear - 2 + i).toString());
 
     const fetchHolidays = () => {
-        fetch('/api/holidays')
+        const token = localStorage.getItem('token');
+        fetch('/api/holidays', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
             .then(res => res.json())
             .then(data => setHolidays(data))
             .catch(err => console.error('Error fetching holidays:', err));
@@ -133,9 +136,13 @@ export default function Holidays() {
             }));
 
             if (formattedData.length > 0) {
+                const token = localStorage.getItem('token');
                 fetch('/api/holidays/bulk', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
                     body: JSON.stringify(formattedData)
                 })
                     .then(res => res.json())
@@ -175,7 +182,11 @@ export default function Holidays() {
         if (!holidayToDelete) return;
 
         try {
-            await fetch(`/api/holidays/${holidayToDelete.id}`, { method: 'DELETE' });
+            const token = localStorage.getItem('token');
+            await fetch(`/api/holidays/${holidayToDelete.id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             fetchHolidays();
             showNotification('Data hari libur berhasil dihapus');
             setIsDeleteModalOpen(false);
@@ -195,9 +206,13 @@ export default function Holidays() {
 
             const method = currentHoliday ? 'PUT' : 'POST';
 
+            const token = localStorage.getItem('token');
             await fetch(url, {
                 method: method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify(formData)
             });
 

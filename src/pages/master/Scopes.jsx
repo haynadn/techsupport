@@ -26,7 +26,10 @@ export default function Scopes() {
     });
 
     const fetchScopes = () => {
-        fetch('/api/scopes')
+        const token = localStorage.getItem('token');
+        fetch('/api/scopes', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
             .then(res => res.json())
             .then(data => setScopes(data))
             .catch(err => console.error('Error fetching scopes:', err));
@@ -75,7 +78,11 @@ export default function Scopes() {
         if (!scopeToDelete) return;
 
         try {
-            await fetch(`/api/scopes/${scopeToDelete.id}`, { method: 'DELETE' });
+            const token = localStorage.getItem('token');
+            await fetch(`/api/scopes/${scopeToDelete.id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             fetchScopes();
             showNotification('Data ruang lingkup berhasil dihapus');
             setIsDeleteModalOpen(false);
@@ -95,9 +102,13 @@ export default function Scopes() {
 
             const method = currentScope ? 'PUT' : 'POST';
 
+            const token = localStorage.getItem('token');
             await fetch(url, {
                 method: method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify(formData)
             });
 

@@ -26,7 +26,10 @@ export default function Materials() {
     });
 
     const fetchMaterials = () => {
-        fetch('/api/materials')
+        const token = localStorage.getItem('token');
+        fetch('/api/materials', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
             .then(res => res.json())
             .then(data => setMaterials(data))
             .catch(err => console.error('Error fetching materials:', err));
@@ -75,7 +78,11 @@ export default function Materials() {
         if (!materialToDelete) return;
 
         try {
-            await fetch(`/api/materials/${materialToDelete.id}`, { method: 'DELETE' });
+            const token = localStorage.getItem('token');
+            await fetch(`/api/materials/${materialToDelete.id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             fetchMaterials();
             showNotification('Data materi training berhasil dihapus');
             setIsDeleteModalOpen(false);
@@ -95,9 +102,13 @@ export default function Materials() {
 
             const method = currentMaterial ? 'PUT' : 'POST';
 
+            const token = localStorage.getItem('token');
             await fetch(url, {
                 method: method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify(formData)
             });
 

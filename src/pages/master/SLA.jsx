@@ -27,7 +27,10 @@ export default function SLA() {
     const categoryOptions = ['Migrasi', 'Customer Service'];
 
     const fetchSLAs = () => {
-        fetch('/api/slas')
+        const token = localStorage.getItem('token');
+        fetch('/api/slas', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) {
@@ -95,7 +98,11 @@ export default function SLA() {
         if (!slaToDelete) return;
 
         try {
-            await fetch(`/api/slas/${slaToDelete.id}`, { method: 'DELETE' });
+            const token = localStorage.getItem('token');
+            await fetch(`/api/slas/${slaToDelete.id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             fetchSLAs();
             showNotification('Data SLA berhasil dihapus');
             setIsDeleteModalOpen(false);
@@ -115,9 +122,13 @@ export default function SLA() {
 
             const method = currentSLA ? 'PUT' : 'POST';
 
+            const token = localStorage.getItem('token');
             await fetch(url, {
                 method: method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify(formData)
             });
 
@@ -225,8 +236,8 @@ export default function SLA() {
                         </TableCell>
                         <TableCell>
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${sla.category === 'Migrasi'
-                                    ? 'bg-purple-100 text-purple-800'
-                                    : 'bg-blue-100 text-blue-800'
+                                ? 'bg-purple-100 text-purple-800'
+                                : 'bg-blue-100 text-blue-800'
                                 }`}>
                                 {sla.category || 'Customer Service'}
                             </span>

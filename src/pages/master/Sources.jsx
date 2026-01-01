@@ -26,7 +26,10 @@ export default function Sources() {
     });
 
     const fetchSources = () => {
-        fetch('/api/sources')
+        const token = localStorage.getItem('token');
+        fetch('/api/sources', {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
             .then(res => res.json())
             .then(data => setSources(data))
             .catch(err => console.error('Error fetching sources:', err));
@@ -75,7 +78,11 @@ export default function Sources() {
         if (!sourceToDelete) return;
 
         try {
-            await fetch(`/api/sources/${sourceToDelete.id}`, { method: 'DELETE' });
+            const token = localStorage.getItem('token');
+            await fetch(`/api/sources/${sourceToDelete.id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
             fetchSources();
             showNotification('Data sumber berhasil dihapus');
             setIsDeleteModalOpen(false);
@@ -95,9 +102,13 @@ export default function Sources() {
 
             const method = currentSource ? 'PUT' : 'POST';
 
+            const token = localStorage.getItem('token');
             await fetch(url, {
                 method: method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify(formData)
             });
 
