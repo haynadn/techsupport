@@ -9,7 +9,7 @@ const { body, validationResult } = require('express-validator');
 require('dotenv').config();
 
 const app = express();
-const port = 3001;
+const port = process.env.PORT || 3001;
 const SECRET_KEY = process.env.JWT_SECRET || 'your_super_secret_key_change_this';
 
 // Security Headers
