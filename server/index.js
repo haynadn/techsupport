@@ -180,14 +180,18 @@ app.post('/api/agents',
         body('email').isEmail().withMessage('Valid email is required'),
         body('username').trim().isLength({ min: 3 }).withMessage('Username must be at least 3 characters'),
         body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-        body('role').isIn(['admin', 'agent', 'leader']).withMessage('Invalid role')
+        body('role').isIn(['admin', 'agent', 'leader', 'Customer Service', 'Migration Specialist', 'Trainer', 'Leader']).withMessage('Invalid role')
     ],
     async (req, res) => {
         // Validate input
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
+            console.error('[AGENT] Validation failed:', JSON.stringify(errors.array(), null, 2));
+            console.error('[AGENT] Request body:', JSON.stringify(req.body, null, 2));
             return res.status(400).json({ errors: errors.array() });
         }
+
+        console.log('[AGENT] Validation passed, processing request...');
 
         const { name, email, username, password, phone, role, status } = req.body;
         try {

@@ -130,7 +130,7 @@ export default function Agents() {
             const method = currentAgent ? 'PUT' : 'POST';
 
             const token = localStorage.getItem('token');
-            await fetch(url, {
+            const response = await fetch(url, {
                 method: method,
                 headers: {
                     'Content-Type': 'application/json',
@@ -139,12 +139,20 @@ export default function Agents() {
                 body: JSON.stringify(formData)
             });
 
+            const result = await response.json();
+
+            if (!response.ok) {
+                const errorMsg = result.errors ? result.errors.map(e => e.msg).join(', ') : (result.message || 'Gagal menyimpan data');
+                showNotification(errorMsg, 'error');
+                return;
+            }
+
             setIsModalOpen(false);
             fetchAgents();
             showNotification(currentAgent ? 'Data agen berhasil diperbarui' : 'Agen baru berhasil ditambahkan');
         } catch (error) {
             console.error('Error saving agent:', error);
-            showNotification('Gagal menyimpan data agen', 'error');
+            showNotification('Gagal menyambung ke server', 'error');
         }
     };
 
